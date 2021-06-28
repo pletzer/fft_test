@@ -55,7 +55,7 @@ program test
     call cpu_time(toc)
 
     dt = toc - tic
-    print *, ' time = ', dt, ' secs res = ', sum(res)
+    print *, 'n = ', n, ' time = ', dt, ' secs res = ', sum(res)
 
     stat = dftiFreeDescriptor(handle)
     call print_error(stat, 'dftiFreeDescriptor')

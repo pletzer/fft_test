@@ -25,5 +25,5 @@ program test
     res = matmul(sines, fs)
     call cpu_time(toc)
     dt = toc - tic
-    print *,'res = ', sum(res), ' time = ', dt, ' secs'
+    print *,'n = ', n, ' time = ', dt, ' secs res = ', sum(res)
 end program test

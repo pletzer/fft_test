@@ -22,12 +22,13 @@ elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
 endif()
 
 # create executables
-file(GLOB srcs "*.f90")
+file(GLOB srcs "${CMAKE_CURRENT_SOURCE_DIR}/*.f90")
 foreach(src ${srcs})
+  message(STATUS "src file: ${src}")
 	get_filename_component(fname ${src} NAME)
 	string(REGEX REPLACE ".f90" "" exe ${fname})
-	message(${exe})
-	add_executable(${exe} ${src})
+	message(STATUS "${exe}")
+	add_executable(${exe} $ENV{MKLROOT}/include/mkl_dfti.f90 ${src})
 	target_link_libraries(${exe} ${MKL_LIBRARIES})
 endforeach()
 
