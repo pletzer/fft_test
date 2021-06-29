@@ -27,10 +27,6 @@ program test
             q(i, j+n/2) = sin((i-1)*(j-1)*2*pi/real(n, 4))
         enddo
     enddo
-    print *,'q '
-    do i = 1, n
-       print *,q(i,:)
-    enddo
 
     call cpu_time(tic)
     res = matmul(q, w)
@@ -38,10 +34,10 @@ program test
     dt = toc - tic
     print *,'matqwr4 n = ', n, ' time = ', dt, ' secs res = ', sum(res)
 
-    print *,'res '
-    do i = 1, n
-       print *,res(i)
-    enddo
+    ! print *,'res '
+    ! do i = 1, n
+    !    print *,res(i)
+    ! enddo
 
 
 end program test

@@ -14,7 +14,7 @@ program test
     implicit none
     integer :: n, stat, i, j
     character(len=32) :: nstr
-    real, allocatable :: w(:), res(:), res2(:)
+    real, allocatable :: w(:), res(:)
     complex, allocatable :: wbar(:)
     type(dfti_descriptor), pointer :: handle
     real :: dt, tic, toc
@@ -32,7 +32,7 @@ program test
     stat = DftiCommitDescriptor(handle)
     call print_error(stat, 'DftiCommitDescriptor')
 
-    allocate(wbar(n), w(n), res(n), res2(n))
+    allocate(wbar(n), w(n), res(n))
 
     do i = 1, n
         w(i) = i
@@ -42,19 +42,12 @@ program test
     wbar(1    ) = 0.
     wbar(1+n/2) = 0.
     do j = 2, n/2
-        wbar(j    ) = w(j)
-        wbar(j+n/2) = cmplx(0., 1.)*w(j+n/2)
+        wbar(j    ) = w(j) + cmplx(0., 1.)*w(j+n/2)
+        wbar(j+n/2) = 0
     enddo
     stat = dftiComputeForward(handle, wbar)
     call print_error(stat, 'dftiComputeForward')
-    res2 = real(wbar, 4)
-    do i = 1, n, 2
-        res(i) = res2(i)
-    enddo
-    do i = 2, n, 2
-        res(i) = res2(n - i + 2)
-    enddo
-
+    res = real(wbar, 4)
     call cpu_time(toc)
     dt = toc - tic
 
@@ -63,9 +56,9 @@ program test
     stat = dftiFreeDescriptor(handle)
     call print_error(stat, 'dftiFreeDescriptor')
 
-    print *,'res '
-    do i = 1, n
-       print *,res(i)
-    enddo
+    ! print *,'res '
+    ! do i = 1, n
+    !    print *,res(i)
+    ! enddo
 
 end program test
