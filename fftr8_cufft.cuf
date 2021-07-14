@@ -1,0 +1,70 @@
+subroutine print_error(stat, fname)
+    !Use MKL_DFTI
+    implicit none
+    integer, intent(in):: stat
+    character(len=*), intent(in) :: fname
+    if (stat /= 0) then
+        print *,'***ERROR*** stat = ', stat, ' after ', fname
+        !print *, DftiErrorMessage(stat)
+    endif
+end subroutine
+
+program test
+
+    ! nvfortran -fast -O3 -o fftr8_cufft fftr8_cufft.cuf -lcufft
+
+    use cufft
+
+    implicit none
+    integer :: n, stat, i, n1
+    integer :: plan, ierr
+    character(len=32) :: nstr
+    real(8), allocatable :: fs(:)
+    real(8), allocatable :: res(:)
+    real :: dt, tic, toc
+    complex*16, allocatable :: fbar(:)
+    complex*16, allocatable, device :: fbar_d(:)
+
+    if (command_argument_count() < 1) then
+        stop 'ERROR must supply array size as command line argument'
+    endif
+    call get_command_argument(1, nstr)
+    read(nstr, *, iostat=stat) n
+    n1 = n + 1
+
+    ! initialise host arrays
+    allocate(fs(n), fbar(2*n1), res(n))
+    do i = 1, n
+        fs(i) = i
+    enddo
+    fbar = 0
+    ! initialise device array
+    allocate(fbar_d(2*n1))
+
+    ! create the plan
+    ierr = cufftPlan1D(plan, 2*n1, CUFFT_Z2Z, 1)
+    call print_error(ierr, "cufftPlan1D")
+
+    call cpu_time(tic)
+
+    ! load the array and copy to device
+    fbar(2:n1) = fs
+    fbar_d = fbar
+
+    ierr = cufftExecZ2Z(plan, fbar_d, fbar_d, CUFFT_FORWARD)
+    call print_error(ierr, "cufftExecZ2Z")
+
+    ! copy back to host
+    fbar = fbar_d
+
+    res = -aimag(fbar(2:n1))
+
+    call cpu_time(toc)
+
+    dt = toc - tic
+    print *, 'fftr8 n = ', n, ' time = ', dt, ' secs res = ', sum(res)
+
+    ierr = cufftDestroy(plan)
+    call print_error(ierr, "cufftDestroy")
+
+end program test
