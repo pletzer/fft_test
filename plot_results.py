@@ -4,7 +4,7 @@ from matplotlib import pylab
 df = pandas.read_csv('results.csv')
 print(df)
 
-styles = ['r-', 'r--', 'c-', 'c--', 'g-', 'g--']
+styles = ['r-', 'r--', 'c-', 'c--', 'g-', 'g--', 'b--', 'k--']
 i = 0
 legs = []
 for colname in df.columns:
