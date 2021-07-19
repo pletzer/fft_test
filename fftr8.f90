@@ -14,13 +14,14 @@ program test
     ! gfortran -O3 fftr8.f90 -I"${MKLROOT}/include" $MKLROOT/include/mkl_cdft.f90 -o fftr8 -L${MKLROOT}/lib/lp64 -lmkl -lgomp
 
     Use MKL_DFTI
+    use omp_lib
 
     implicit none
     integer :: n, stat, i, n1
     character(len=32) :: nstr
     real(8), allocatable :: fs(:)
     real(8), allocatable :: res(:)
-    real :: dt, tic, toc
+    real(8) :: dt, tic, toc
 
     type(dfti_descriptor), pointer :: handle
     complex*16, allocatable :: fbar(:)
@@ -44,7 +45,7 @@ program test
     stat = DftiCommitDescriptor(handle)
     call print_error(stat, 'DftiCommitDescriptor')
 
-    call cpu_time(tic)
+    tic = omp_get_wtime()
     ! load the array
     fbar(2:n1) = fs
 
@@ -52,7 +53,7 @@ program test
     call print_error(stat, 'dftiComputeForward')
 
     res = -aimag(fbar(2:n1))
-    call cpu_time(toc)
+    toc = omp_get_wtime()
 
     dt = toc - tic
     print *, 'fftr8 n = ', n, ' time = ', dt, ' secs res = ', sum(res)

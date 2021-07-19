@@ -1,10 +1,11 @@
 program test
-    ! gfortran -O3 matr8.f90 -o matr8
+    ! gfortran -O3 matr8.f90 -o matr8 -fopenmp
+    use omp_lib
     implicit none
     integer :: n, stat, i, j
     character(len=32) :: nstr
     real(8), allocatable :: fs(:), sines(:, :), res(:)
-    real :: dt, tic, toc
+    real(8) :: dt, tic, toc
     real(8), parameter :: pi = 4*atan(1.)
 
     if (command_argument_count() < 1) then
@@ -21,9 +22,9 @@ program test
         enddo
     enddo
 
-    call cpu_time(tic)
+    tic = omp_get_wtime()
     res = matmul(sines, fs)
-    call cpu_time(toc)
+    toc = omp_get_wtime()
     dt = toc - tic
     print *,'matr8 n = ', n, ' time = ', dt, ' secs res = ', sum(res)
 end program test
