@@ -1,0 +1,43 @@
+program test
+    ! nvfortran -fast -O3 -o matr8_cublas matr8_cublas.cuf -lcublas
+    use omp_lib
+    use cublas
+    implicit none
+    integer :: n, stat, i, j
+    character(len=32) :: nstr
+    real(8), allocatable :: fs(:), sines(:, :), res(:)
+    real(8), allocatable, device :: fs_d(:), sines_d(:, :), res_d(:)
+    real(8) :: dt, tic, toc
+    real(8), parameter :: pi = 4*atan(1.)
+
+    if (command_argument_count() < 1) then
+        stop 'ERROR must supply array size as command line argument'
+    endif
+    call get_command_argument(1, nstr)
+    read(nstr, *, iostat=stat) n
+
+    allocate(fs(n), sines(n, n), res(n))
+    do j = 1, n
+        fs(j) = j
+        do i = 1, n
+            sines(i, j) = sin(i*j*pi/real(n + 1, 8))
+        enddo
+    enddo
+
+    allocate(fs_d(n), sines_d(n, n), res_d(n))
+
+    tic = omp_get_wtime()
+
+    ! copy data to device
+    fs_d = fs
+    sines_d = sines
+
+    call dgemv('n', n, n, 1.d0, sines_d, n, fs_d, 1, 0.d0, res_d, 1)
+
+    ! copy result to host
+    res = res_d    
+
+    toc = omp_get_wtime()
+    dt = toc - tic
+    print *,'matr8 n = ', n, ' time = ', dt, ' secs res = ', sum(res)
+end program test
