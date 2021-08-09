@@ -23,7 +23,7 @@ program test
     real(8), allocatable :: res(:)
     real :: dt, tic, toc
     complex*16, allocatable :: fbar(:)
-    complex*16, allocatable, device :: fbar_d(:)
+    complex*16, allocatable, device :: fbar_d(:) ! CUDA
 
     if (command_argument_count() < 1) then
         stop 'ERROR must supply array size as command line argument'
@@ -49,22 +49,22 @@ program test
 
     ! load the array and copy to device
     fbar(2:n1) = fs
-    fbar_d = fbar
+    fbar_d = fbar ! transfer to the device CUDA
 
     ierr = cufftExecZ2Z(plan, fbar_d, fbar_d, CUFFT_FORWARD)
     call print_error(ierr, "cufftExecZ2Z")
 
-    ! copy back to host
+    ! copy back to host CUDA
     fbar = fbar_d
 
-    res = -aimag(fbar(2:n1))
+    res = -aimag(fbar(2:n1)) ! could be done on the device CUDA
 
     call cpu_time(toc)
 
     dt = toc - tic
     print *, 'fftr8 n = ', n, ' time = ', dt, ' secs res = ', sum(res)
 
-    ierr = cufftDestroy(plan)
+    ierr = cufftDestroy(plan) ! CUDA
     call print_error(ierr, "cufftDestroy")
 
 end program test

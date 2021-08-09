@@ -1,6 +1,6 @@
 program test
     ! nvfortran -fast -O3 -o matr8_cublas matr8_cublas.cuf -lcublas
-    use omp_lib
+    !use omp_lib
     use cublas
     implicit none
     integer :: n, stat, i, j
@@ -26,7 +26,7 @@ program test
 
     allocate(fs_d(n), sines_d(n, n), res_d(n))
 
-    tic = omp_get_wtime()
+    call cpu_time(tic) ! tic = omp_get_wtime()
 
     ! copy data to device
     fs_d = fs
@@ -37,7 +37,7 @@ program test
     ! copy result to host
     res = res_d    
 
-    toc = omp_get_wtime()
+    call cpu_time(toc) ! toc = omp_get_wtime()
     dt = toc - tic
     print *,'matr8 n = ', n, ' time = ', dt, ' secs res = ', sum(res)
 end program test

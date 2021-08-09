@@ -50,7 +50,7 @@ program test
     enddo
     stat = dftiComputeForward(handle, wbar)
     call print_error(stat, 'dftiComputeForward')
-    res = real(wbar, 4)
+    res = real(wbar, 8)
     call cpu_time(toc)
     dt = toc - tic
 
